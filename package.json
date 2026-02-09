@@ -2,15 +2,18 @@
   "name": "backend_project",
   "version": "1.0.0",
   "description": "Backend API for MERN Stack Project",
+  "type": "module",
   "keywords": [
     "javascript",
     "backend"
   ],
   "license": "ISC",
   "author": "dipu kumar",
-  "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }
