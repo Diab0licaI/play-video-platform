@@ -7,7 +7,8 @@ const playlistSchema = new Schema({
     },
     description: {
         type: String,
-        required: true
+        required: false,   // ✅ FIXED: was true, caused 500 on empty description
+        default: ""
     },
     videos: [
         {
@@ -20,7 +21,5 @@ const playlistSchema = new Schema({
         ref: "User"
     },
 }, {timestamps: true})
-
-
 
 export const Playlist = mongoose.model("Playlist", playlistSchema)

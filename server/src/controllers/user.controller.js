@@ -1,3 +1,4 @@
+import { Video } from "../models/video.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import{ApiError} from "../utils/ApiError.js"
 import {User,} from "../models/user.model.js"
@@ -33,7 +34,7 @@ const registerUser = asyncHandler(async(req, res) => {
     // check for user creation
     // return res
 
-     console.log("req.files:", req.files)  // 👈 ADD THIS
+    console.log("req.files:", req.files)  // 👈 ADD THIS
     console.log("req.body:", req.body)    // 👈 ADD THIS
 
     const{fullName, email, username, password}  = req.body
@@ -106,11 +107,9 @@ const loginUser = asyncHandler(async (req, res) => {
     //send cookie
     
     const {email, username, password} = req.body
-    if (!username || !email) {
     if (!username && !email) {
-        throw new ApiError(400, "username or email is required")
-    }    
-    }
+    throw new ApiError(400, "username or email is required")
+    } 
     
     const user = await User.findOne({
         $or: [{username}, {email}]
@@ -164,10 +163,9 @@ const logoutUser = asyncHandler(async(req, res) => {
     )
 
     const options = {
-        httpOnly: true,
-        secure: true
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production"
     }
-
     return res
     .status(200)
     .clearCookie("accessToken", options)
@@ -177,7 +175,7 @@ const logoutUser = asyncHandler(async(req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) =>
  {
-    const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
     if (!incomingRefreshToken) {
         throw new ApiError(401, "unathorized reqest")
     }
@@ -204,8 +202,7 @@ const refreshAccessToken = asyncHandler(async (req, res) =>
             secure: true
         }
     
-        const {accessToken, newRefreshToken} = await generateAccessAndRefereshTokens(user._id)
-    
+        const {accessToken, refreshToken: newRefreshToken} = await generateAccessAndRefereshTokens(user._id)    
         return res
         .status(200)
         .cookie("accessToken", accessToken, options)
@@ -344,6 +341,43 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
     )
 })
 
+const getUserChannelProfile = asyncHandler(
+  async (req, res) => {
+    const { username } = req.params;
+
+    const user = await User.findOne({
+      username,
+    }).select(
+      "-password -refreshToken"
+    );
+
+    if (!user) {
+      throw new ApiError(
+        404,
+        "Channel not found"
+      );
+    }
+
+    const videos = await Video.find({
+      owner: user._id,
+      isPublished: true,
+    }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          user,
+          videos,
+        },
+        "Channel fetched successfully"
+      )
+    );
+  }
+);
+
 export{
     registerUser,
     loginUser,
@@ -353,5 +387,6 @@ export{
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChannelProfile
 }  
