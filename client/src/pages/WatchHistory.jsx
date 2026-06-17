@@ -7,6 +7,7 @@ import {
 } from "../api/watchHistoryAPI";
 import { formatDistanceToNow } from "date-fns";
 import { Clock, Trash2, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import MainLayout from "../components/layout/MainLayout";
 
 const groupByDate = (items) => {
@@ -21,6 +22,17 @@ const groupByDate = (items) => {
   return { Today: today, Yesterday: yesterday, "This week": older };
 };
 
+const HistoryRowSkeleton = () => (
+  <div className="flex gap-3 p-2.5">
+    <div className="h-[90px] w-40 shrink-0 animate-pulse rounded-lg bg-[#1a1a1a]" />
+    <div className="flex-1 space-y-2 pt-1">
+      <div className="h-3.5 w-5/6 animate-pulse rounded bg-[#1a1a1a]" />
+      <div className="h-3 w-1/3 animate-pulse rounded bg-[#1a1a1a]" />
+      <div className="h-3 w-1/2 animate-pulse rounded bg-[#1a1a1a]" />
+    </div>
+  </div>
+);
+
 export default function WatchHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +40,8 @@ export default function WatchHistory() {
   useEffect(() => {
     getWatchHistory()
       .then((res) => {
-      console.log("HISTORY RESPONSE:", res.data); // 👈 add this
-      const data = res.data.data;
-      setHistory(Array.isArray(data) ? data : data.history || []);
+        const data = res.data.data;
+        setHistory(Array.isArray(data) ? data : data.history || []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -51,9 +62,9 @@ export default function WatchHistory() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-[#0f0f0f] px-6 py-6 max-w-4xl mx-auto">
+      <div className="mx-auto min-h-screen max-w-4xl bg-[#0f0f0f] px-4 py-6 sm:px-6">
 
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Clock className="text-red-500" size={22} />
             <h1 className="text-xl font-medium text-white">Watch history</h1>
@@ -61,7 +72,7 @@ export default function WatchHistory() {
           {history.length > 0 && (
             <button
               onClick={handleClearAll}
-              className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 hover:bg-[#272727] px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-400 transition-colors hover:bg-[#272727] hover:text-red-500"
             >
               <Trash2 size={15} />
               Clear all history
@@ -70,48 +81,68 @@ export default function WatchHistory() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="h-8 w-8 rounded-full border-2 border-gray-600 border-t-red-500 animate-spin" />
+          <div className="flex flex-col gap-1">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <HistoryRowSkeleton key={i} />
+            ))}
           </div>
         ) : history.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 gap-3">
+          <div className="flex flex-col items-center justify-center gap-3 py-32">
             <Clock size={52} className="text-[#333]" />
-            <p className="text-[#555] text-base">No watch history yet</p>
-            <span className="text-[#444] text-sm">Videos you watch will appear here</span>
+            <p className="text-base text-[#555]">No watch history yet</p>
+            <span className="text-sm text-[#444]">Videos you watch will appear here</span>
           </div>
         ) : (
           <div className="flex flex-col gap-1">
             {Object.entries(groups).map(([label, items]) =>
               items.length === 0 ? null : (
                 <div key={label}>
-                  <p className="text-sm font-medium text-gray-500 px-1 mt-4 mb-2">{label}</p>
-                  {items.map(({ video, updatedAt }) => (
-                    <div key={video._id} className="group flex gap-3 p-2.5 rounded-xl hover:bg-[#1a1a1a] transition-colors relative">
-                      <Link to={`/videos/${video._id}`} className="flex-shrink-0">
-                        <div className="relative w-40 h-[90px] rounded-lg overflow-hidden bg-[#272727]">
-                          <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
-                        </div>
-                      </Link>
-                      <div className="flex-1 min-w-0 pt-0.5">
-                        <Link to={`/videos/${video._id}`}>
-                          <h3 className="text-sm font-medium text-white line-clamp-2 leading-snug hover:text-red-400 transition-colors mb-1.5">{video.title}</h3>
-                        </Link>
-                        <Link to={`/channel/${video.owner?.username}`}>
-                          <p className="text-xs text-gray-400 hover:text-gray-300 mb-1">{video.owner?.fullName || video.owner?.username}</p>
-                        </Link>
-                        <p className="text-xs text-[#717171]">
-                          {video.views} views · {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleRemove(video._id)}
-                        className="opacity-0 group-hover:opacity-100 absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-[#272727] hover:bg-[#3a3a3a] text-gray-400 hover:text-white transition-all"
-                        title="Remove from history"
+                  <p className="mb-2 mt-4 px-1 text-sm font-medium text-gray-500">{label}</p>
+                  <AnimatePresence initial={false}>
+                    {items.map(({ video, updatedAt }, index) => (
+                      <motion.div
+                        key={video._id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2, delay: Math.min(index * 0.03, 0.2) }}
+                        className="group relative flex gap-3 rounded-xl p-2.5 transition-colors hover:bg-[#1a1a1a]"
                       >
-                        <X size={15} />
-                      </button>
-                    </div>
-                  ))}
+                        <Link to={`/videos/${video._id}`} className="flex-shrink-0">
+                          <div className="relative h-[90px] w-40 overflow-hidden rounded-lg bg-[#272727]">
+                            <img
+                              src={video.thumbnail}
+                              alt={video.title}
+                              loading="lazy"
+                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          </div>
+                        </Link>
+                        <div className="min-w-0 flex-1 pt-0.5">
+                          <Link to={`/videos/${video._id}`}>
+                            <h3 className="mb-1.5 line-clamp-2 text-sm font-medium leading-snug text-white transition-colors hover:text-red-400">
+                              {video.title}
+                            </h3>
+                          </Link>
+                          <Link to={`/channel/${video.owner?.username}`}>
+                            <p className="mb-1 text-xs text-gray-400 hover:text-gray-300">
+                              {video.owner?.fullName || video.owner?.username}
+                            </p>
+                          </Link>
+                          <p className="text-xs text-[#717171]">
+                            {video.views} views · {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleRemove(video._id)}
+                          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#272727] text-gray-400 opacity-0 transition-all hover:bg-[#3a3a3a] hover:text-white group-hover:opacity-100"
+                          title="Remove from history"
+                        >
+                          <X size={15} />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
               )
             )}

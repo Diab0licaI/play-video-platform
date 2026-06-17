@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import VideoGrid from "../components/video/VideoGrid";
+import VideoCardSkeleton from "../components/video/VideoCardSkeleton";
 import { videoApi } from "../api/videoApi";
+
 
 const Home = () => {
   const [videos, setVideos] = useState([]);
@@ -14,10 +16,8 @@ const Home = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       setLoading(true);
-        console.log("SEARCH QUERY:", searchQuery); 
       try {
         const res = await videoApi.getAllVideos(searchQuery);
-        console.log("API URL:", res.config.url);
         setVideos(res.data.data);
       } catch (error) {
         console.log("VIDEO ERROR:", error);
@@ -31,9 +31,8 @@ const Home = () => {
 
   return (
     <MainLayout>
-      <div className="px-6 py-4">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
 
-        {/* Search heading */}
         {searchQuery && (
           <h2 className="mb-4 text-lg font-semibold text-white">
             Results for "{searchQuery}"
@@ -41,11 +40,10 @@ const Home = () => {
         )}
 
         {loading ? (
-          <div className="flex min-h-[60vh] items-center justify-center">
-            <div className="text-center">
-              <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-600 border-t-red-500" />
-              <p className="text-gray-400">Loading videos...</p>
-            </div>
+          <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <VideoCardSkeleton key={i} />
+            ))}
           </div>
         ) : videos.length === 0 ? (
           <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">

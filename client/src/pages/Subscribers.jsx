@@ -1,8 +1,20 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import { Users } from "lucide-react";
+import { motion } from "framer-motion";
 import { subscriptionApi } from "../api/subscriptionApi";
 import { userApi } from "../api/userApi";
 import MainLayout from "../components/layout/MainLayout";
+
+const SubscriberSkeleton = () => (
+  <div className="mb-4 flex items-center gap-4 rounded-xl bg-[#1a1a1a] p-4">
+    <div className="h-12 w-12 animate-pulse rounded-full bg-[#272727]" />
+    <div className="space-y-2">
+      <div className="h-3.5 w-32 animate-pulse rounded bg-[#272727]" />
+      <div className="h-3 w-24 animate-pulse rounded bg-[#272727]" />
+    </div>
+  </div>
+);
 
 const Subscribers = () => {
   const { username } = useParams();
@@ -13,37 +25,13 @@ const Subscribers = () => {
   useEffect(() => {
     const fetchSubscribers = async () => {
       try {
-        // Get channel by username
-        const channelRes =
-          await userApi.getChannel(username);
+        const channelRes = await userApi.getChannel(username);
+        const channelId = channelRes.data.data.user._id;
 
-        const channelId =
-          channelRes.data.data.user._id;
-
-        console.log(
-          "CHANNEL ID:",
-          channelId
-        );
-
-        // Get subscribers
-        const subRes =
-          await subscriptionApi.getUserChannelSubscribers(
-            channelId
-          );
-
-        console.log(
-          "SUBSCRIBERS RESPONSE:",
-          subRes.data
-        );
-
-        setSubscribers(
-          subRes.data.data.subscribers
-        );
+        const subRes = await subscriptionApi.getUserChannelSubscribers(channelId);
+        setSubscribers(subRes.data.data.subscribers);
       } catch (error) {
-        console.log(
-          "SUBSCRIBERS ERROR:",
-          error
-        );
+        console.error("SUBSCRIBERS ERROR:", error);
       } finally {
         setLoading(false);
       }
@@ -52,49 +40,70 @@ const Subscribers = () => {
     fetchSubscribers();
   }, [username]);
 
-  if (loading) {
-    return (
-      <MainLayout>
-        <div className="p-6 text-white">
-          Loading subscribers...
-        </div>
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout>
-      <div className="mx-auto max-w-3xl p-6">
-        <h1 className="mb-6 text-3xl font-bold text-white">
-          Subscribers ({subscribers.length})
-        </h1>
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
 
-        {subscribers.length === 0 ? (
-          <p className="text-gray-400">
-            No subscribers yet.
-          </p>
+        <div className="mb-6 flex items-center gap-3">
+          <Users className="text-red-500" size={24} />
+          <h1 className="text-2xl font-bold text-white">
+            Subscribers
+            {!loading && (
+              <span className="ml-2 text-base font-normal text-gray-500">
+                ({subscribers.length})
+              </span>
+            )}
+          </h1>
+        </div>
+
+        {loading ? (
+          <>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SubscriberSkeleton key={i} />
+            ))}
+          </>
+        ) : subscribers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
+            <Users size={48} className="text-[#333]" />
+            <p className="text-base text-[#555]">No subscribers yet</p>
+            <span className="text-sm text-[#444]">
+              Subscribers will show up here once people follow this channel.
+            </span>
+          </div>
         ) : (
-          subscribers.map((sub) => (
-            <div
+          subscribers.map((sub, index) => (
+            <motion.div
               key={sub._id}
-              className="mb-4 flex items-center gap-4 rounded-lg bg-[#272727] p-4"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: Math.min(index * 0.04, 0.3) }}
+              className="mb-4 flex items-center gap-4 rounded-xl bg-[#1a1a1a] p-4 transition-colors hover:bg-[#1f1f1f]"
             >
-              <img
-                src={sub.subscriber?.avatar}
-                alt={sub.subscriber?.fullName}
-                className="h-12 w-12 rounded-full object-cover"
-              />
+              <Link to={`/channel/${sub.subscriber?.username}`} className="shrink-0">
+                {sub.subscriber?.avatar ? (
+                  <img
+                    src={sub.subscriber.avatar}
+                    alt={sub.subscriber?.fullName}
+                    className="h-12 w-12 rounded-full object-cover ring-1 ring-white/10"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 font-medium text-white">
+                    {sub.subscriber?.fullName?.[0]?.toUpperCase() ?? "U"}
+                  </div>
+                )}
+              </Link>
 
-              <div>
-                <p className="font-medium text-white">
-                  {sub.subscriber?.fullName}
-                </p>
-
-                <p className="text-sm text-gray-400">
+              <div className="min-w-0 flex-1">
+                <Link to={`/channel/${sub.subscriber?.username}`}>
+                  <p className="truncate font-medium text-white transition-colors hover:text-red-400">
+                    {sub.subscriber?.fullName}
+                  </p>
+                </Link>
+                <p className="truncate text-sm text-gray-400">
                   @{sub.subscriber?.username}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>

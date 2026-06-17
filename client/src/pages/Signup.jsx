@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Camera, ImagePlus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 
 const Signup = () => {
   const navigate = useNavigate();
   const { register: registerUser } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
 
   const onSubmit = async (data) => {
@@ -26,105 +31,163 @@ const Signup = () => {
     }
   };
 
+  const handlePreview = (e, setPreview) => {
+    const file = e.target.files?.[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
+
+  const avatarReg = register("avatar", { required: true });
+  const coverReg = register("coverImage");
+
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-[#0f0f0f] px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="w-full max-w-md"
+      >
 
         {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="bg-red-600 rounded-lg px-2 py-1">
-            <span className="text-white font-bold text-lg">▶</span>
+        <div className="mb-8 flex items-center justify-center gap-2">
+          <div className="rounded-lg bg-red-600 px-2 py-1">
+            <span className="text-lg font-bold text-white">▶</span>
           </div>
-          <span className="text-white text-xl font-semibold">Play</span>
+          <span className="text-xl font-semibold text-white">Play</span>
         </div>
 
         {/* Card */}
-        <div className="bg-[#1a1a1a] rounded-2xl p-8 border border-white/10">
-          <h1 className="text-white text-2xl font-semibold mb-1">Create account</h1>
-          <p className="text-gray-400 text-sm mb-6">Join and start watching</p>
+        <div className="rounded-2xl border border-white/10 bg-[#1a1a1a] p-8">
+          <h1 className="mb-1 text-2xl font-semibold text-white">Create account</h1>
+          <p className="mb-6 text-sm text-gray-400">Join and start watching</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block">Full Name</label>
+                <label className="mb-1.5 block text-xs text-gray-400">Full Name</label>
                 <input
                   placeholder="John Doe"
-                  className="w-full bg-[#272727] text-white rounded-lg px-3 py-2.5 text-sm outline-none border border-transparent focus:border-red-500 transition-colors placeholder-gray-600"
+                  className="w-full rounded-lg border border-transparent bg-[#272727] px-3 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-red-500"
                   {...register("fullName", { required: true })}
                 />
-                {errors.fullName && <p className="text-red-400 text-xs mt-1">Required</p>}
+                {errors.fullName && <p className="mt-1 text-xs text-red-400">Required</p>}
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block">Username</label>
+                <label className="mb-1.5 block text-xs text-gray-400">Username</label>
                 <input
                   placeholder="johndoe"
-                  className="w-full bg-[#272727] text-white rounded-lg px-3 py-2.5 text-sm outline-none border border-transparent focus:border-red-500 transition-colors placeholder-gray-600"
+                  className="w-full rounded-lg border border-transparent bg-[#272727] px-3 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-red-500"
                   {...register("username", { required: true })}
                 />
-                {errors.username && <p className="text-red-400 text-xs mt-1">Required</p>}
+                {errors.username && <p className="mt-1 text-xs text-red-400">Required</p>}
               </div>
             </div>
 
             <div>
-              <label className="text-xs text-gray-400 mb-1.5 block">Email</label>
+              <label className="mb-1.5 block text-xs text-gray-400">Email</label>
               <input
                 type="email"
                 placeholder="you@example.com"
-                className="w-full bg-[#272727] text-white rounded-lg px-4 py-2.5 text-sm outline-none border border-transparent focus:border-red-500 transition-colors placeholder-gray-600"
+                className="w-full rounded-lg border border-transparent bg-[#272727] px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-red-500"
                 {...register("email", { required: true })}
               />
-              {errors.email && <p className="text-red-400 text-xs mt-1">Required</p>}
+              {errors.email && <p className="mt-1 text-xs text-red-400">Required</p>}
             </div>
 
             <div>
-              <label className="text-xs text-gray-400 mb-1.5 block">Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full bg-[#272727] text-white rounded-lg px-4 py-2.5 text-sm outline-none border border-transparent focus:border-red-500 transition-colors placeholder-gray-600"
-                {...register("password", { required: true })}
-              />
-              {errors.password && <p className="text-red-400 text-xs mt-1">Required</p>}
+              <label className="mb-1.5 block text-xs text-gray-400">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="w-full rounded-lg border border-transparent bg-[#272727] px-4 py-2.5 pr-10 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-red-500"
+                  {...register("password", { required: true })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors hover:text-gray-300"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {errors.password && <p className="mt-1 text-xs text-red-400">Required</p>}
             </div>
 
-            {/* File uploads */}
+            {/* File uploads with preview */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block">Avatar <span className="text-red-400">*</span></label>
-                <label className="flex items-center justify-center gap-2 w-full bg-[#272727] hover:bg-[#323232] text-gray-400 hover:text-white rounded-lg px-3 py-2.5 text-xs cursor-pointer transition-colors border border-transparent hover:border-red-500">
-                  📷 Choose file
-                  <input type="file" accept="image/*" className="hidden" {...register("avatar", { required: true })} />
+                <label className="mb-1.5 block text-xs text-gray-400">
+                  Avatar <span className="text-red-400">*</span>
                 </label>
-                {errors.avatar && <p className="text-red-400 text-xs mt-1">Required</p>}
+                <label className="flex h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border border-transparent bg-[#272727] text-xs text-gray-400 transition-colors hover:border-red-500 hover:bg-[#323232] hover:text-white">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="avatar preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <>
+                      <Camera size={18} />
+                      Choose file
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    {...avatarReg}
+                    onChange={(e) => {
+                      avatarReg.onChange(e);
+                      handlePreview(e, setAvatarPreview);
+                    }}
+                  />
+                </label>
+                {errors.avatar && <p className="mt-1 text-xs text-red-400">Required</p>}
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block">Cover Image</label>
-                <label className="flex items-center justify-center gap-2 w-full bg-[#272727] hover:bg-[#323232] text-gray-400 hover:text-white rounded-lg px-3 py-2.5 text-xs cursor-pointer transition-colors border border-transparent hover:border-red-500">
-                  🖼️ Choose file
-                  <input type="file" accept="image/*" className="hidden" {...register("coverImage")} />
+                <label className="mb-1.5 block text-xs text-gray-400">Cover Image</label>
+                <label className="flex h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border border-transparent bg-[#272727] text-xs text-gray-400 transition-colors hover:border-red-500 hover:bg-[#323232] hover:text-white">
+                  {coverPreview ? (
+                    <img src={coverPreview} alt="cover preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <>
+                      <ImagePlus size={18} />
+                      Choose file
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    {...coverReg}
+                    onChange={(e) => {
+                      coverReg.onChange(e);
+                      handlePreview(e, setCoverPreview);
+                    }}
+                  />
                 </label>
               </div>
             </div>
 
-            <button
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               disabled={isSubmitting}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors mt-2"
+              className="mt-2 w-full rounded-lg bg-red-600 py-2.5 font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
             >
               {isSubmitting ? "Creating account..." : "Create account"}
-            </button>
+            </motion.button>
 
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="mt-4 text-center text-sm text-gray-500">
           Already have an account?{" "}
-          <Link to="/login" className="text-red-400 hover:text-red-300 transition-colors">
+          <Link to="/login" className="text-red-400 transition-colors hover:text-red-300">
             Sign in
           </Link>
         </p>
 
-      </div>
+      </motion.div>
     </div>
   );
 };

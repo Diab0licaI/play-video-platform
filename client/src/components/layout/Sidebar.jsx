@@ -43,15 +43,22 @@ const Sidebar = () => {
               end={path === "/"}
               title={name}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-xl text-xs transition
+                `relative flex h-12 w-12 flex-col items-center justify-center gap-1 rounded-xl text-xs transition-all duration-200
                 ${isActive
                   ? "bg-white/10 text-white"
-                  : "text-gray-500 hover:bg-white/5 hover:text-white"
+                  : "text-gray-500 hover:bg-white/5 hover:text-white hover:scale-105"
                 }`
               }
             >
-              <Icon className="h-5 w-5 shrink-0" />
-              <span className="text-[10px]">{name}</span>
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-red-500" />
+                  )}
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="text-[10px]">{name}</span>
+                </>
+              )}
             </NavLink>
           ))}
 
@@ -63,15 +70,22 @@ const Sidebar = () => {
               to={path}
               title={name}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-xl text-xs transition
+                `relative flex h-12 w-12 flex-col items-center justify-center gap-1 rounded-xl text-xs transition-all duration-200
                 ${isActive
                   ? "bg-white/10 text-white"
-                  : "text-gray-500 hover:bg-white/5 hover:text-white"
+                  : "text-gray-500 hover:bg-white/5 hover:text-white hover:scale-105"
                 }`
               }
             >
-              <Icon className="h-5 w-5 shrink-0" />
-              <span className="text-[10px]">{name}</span>
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-red-500" />
+                  )}
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="text-[10px]">{name}</span>
+                </>
+              )}
             </NavLink>
           ))}
 
@@ -84,7 +98,7 @@ const Sidebar = () => {
               <img
                 src={user.avatar}
                 alt={user.fullName}
-                className="h-8 w-8 rounded-full object-cover"
+                className="h-8 w-8 rounded-full object-cover ring-1 ring-white/10 transition-transform hover:scale-105"
               />
             ) : (
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white">
@@ -103,7 +117,7 @@ const Sidebar = () => {
             to={path}
             end={path === "/"}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-1 text-xs transition
+              `flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition-colors
               ${isActive ? "text-white" : "text-gray-500"}`
             }
           >

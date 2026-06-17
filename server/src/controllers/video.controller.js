@@ -29,7 +29,6 @@ const searchVideos = asyncHandler(async (req, res) => {
 });
 
 const getAllVideos = asyncHandler(async (req, res) => {
-  console.log("ALL QUERY PARAMS:", req.query);
   const { search } = req.query;
   const query = { isPublished: true };
 

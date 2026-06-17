@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { userApi } from "../api/userApi";
 import { subscriptionApi } from "../api/subscriptionApi";
 import MainLayout from "../components/layout/MainLayout";
+import VideoCard from "../components/video/VideoCard";
 import { useAuth } from "../context/AuthContext";
 
 const Channel = () => {
@@ -24,7 +25,6 @@ const Channel = () => {
         setChannel(channelData);
         setVideos(res.data.data.videos);
 
-        // Fetch subscription status
         if (user) {
           try {
             const subRes = await subscriptionApi.getStatus(channelData._id);
@@ -127,7 +127,6 @@ const Channel = () => {
         <div className="px-6 pb-6">
           <div className="flex items-end justify-between -mt-8">
 
-            {/* Avatar + Name */}
             <div className="flex items-end gap-4">
               {channel.avatar ? (
                 <img
@@ -148,7 +147,6 @@ const Channel = () => {
               </div>
             </div>
 
-            {/* Subscribe Button */}
             {!isOwnChannel && (
               <button
                 onClick={handleSubscribe}
@@ -165,17 +163,14 @@ const Channel = () => {
 
           {/* Stats */}
           <div className="mt-3 flex gap-2 text-sm text-gray-400 border-b border-gray-700 pb-4">
-
             <Link
               to={`/channel/${channel._id}/subscribers`}
               className="hover:text-red-500 transition"
              >
-            {subscriberCount}{" "}
-            {subscriberCount === 1 ? "Subscriber" : "Subscribers"}
+              {subscriberCount}{" "}
+              {subscriberCount === 1 ? "Subscriber" : "Subscribers"}
             </Link>
-
             <span>•</span>
-
             <span>
               {videos.length}{" "}
               {videos.length === 1 ? "Video" : "Videos"}
@@ -195,32 +190,7 @@ const Channel = () => {
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {videos.map((video) => (
-                  <Link
-                    key={video._id}
-                    to={`/videos/${video._id}`}
-                    className="group overflow-hidden rounded-xl bg-[#272727] transition hover:bg-[#3a3a3a]"
-                  >
-                    <div className="aspect-video w-full overflow-hidden">
-                      <img
-                        src={video.thumbnail}
-                        alt={video.title}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="p-3">
-                      <h3 className="line-clamp-2 font-medium text-white">
-                        {video.title}
-                      </h3>
-                      <p className="mt-1 text-xs text-gray-400">
-                        {video.views ?? 0} views •{" "}
-                        {new Date(video.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-                  </Link>
+                  <VideoCard key={video._id} video={video} showOwner={false} />
                 ))}
               </div>
             )}

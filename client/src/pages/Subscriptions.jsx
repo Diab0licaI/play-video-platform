@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { subscriptionApi } from "../api/subscriptionApi";
 import MainLayout from "../components/layout/MainLayout";
+import VideoCard from "../components/video/VideoCard";
+import { useEffect, useState } from "react";
 
 const Subscriptions = () => {
   const [videos, setVideos] = useState([]);
@@ -74,53 +75,7 @@ const Subscriptions = () => {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {videos.map((video) => (
-              <Link
-                key={video._id}
-                to={`/videos/${video._id}`}
-                className="group overflow-hidden rounded-xl bg-[#272727] transition hover:bg-[#3a3a3a]"
-              >
-                {/* Thumbnail */}
-                <div className="aspect-video w-full overflow-hidden">
-                  <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                  />
-                </div>
-
-                {/* Info */}
-                <div className="p-3">
-                  {/* Channel */}
-                  <div className="mb-2 flex items-center gap-2">
-                    {video.owner?.avatar ? (
-                      <img
-                        src={video.owner.avatar}
-                        alt={video.owner.fullName}
-                        className="h-6 w-6 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-600 text-xs text-white">
-                        {video.owner?.fullName?.[0]?.toUpperCase() ?? "U"}
-                      </div>
-                    )}
-                    <span className="text-xs text-gray-400">
-                      {video.owner?.fullName}
-                    </span>
-                  </div>
-
-                  <h3 className="line-clamp-2 font-medium text-white">
-                    {video.title}
-                  </h3>
-                  <p className="mt-1 text-xs text-gray-400">
-                    {video.views ?? 0} views •{" "}
-                    {new Date(video.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </p>
-                </div>
-              </Link>
+              <VideoCard key={video._id} video={video} />
             ))}
           </div>
         )}
