@@ -119,7 +119,3 @@ npm run dev
 The client runs on `http://localhost:5173` and the server on `http://localhost:5000`.
 
 ---
-
-## 📄 License
-
-This project is open-source and available under the [MIT License](LICENSE).
