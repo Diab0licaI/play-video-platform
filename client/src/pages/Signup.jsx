@@ -49,12 +49,14 @@ const Signup = () => {
       >
 
         {/* Logo */}
-        <div className="mb-8 flex items-center justify-center gap-2">
-          <div className="rounded-lg bg-red-600 px-2 py-1">
-            <span className="text-lg font-bold text-white">▶</span>
-          </div>
-          <span className="text-xl font-semibold text-white">Play</span>
-        </div>
+        <div className="mb-8 flex items-center justify-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-600 shadow-lg shadow-red-600/30">
+            <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+           </svg>
+           </div>
+         <span className="text-2xl font-bold tracking-tight text-white">Play</span>
+         </div>
 
         {/* Card */}
         <div className="rounded-2xl border border-white/10 bg-[#1a1a1a] p-8">
