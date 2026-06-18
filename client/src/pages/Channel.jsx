@@ -164,7 +164,7 @@ const Channel = () => {
           {/* Stats */}
           <div className="mt-3 flex gap-2 text-sm text-gray-400 border-b border-gray-700 pb-4">
             <Link
-              to={`/channel/${channel._id}/subscribers`}
+              to={`/channel/${channel.username}/subscribers`}
               className="hover:text-red-500 transition"
              >
               {subscriberCount}{" "}
