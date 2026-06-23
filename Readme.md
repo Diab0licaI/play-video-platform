@@ -119,3 +119,10 @@ npm run dev
 The client runs on `http://localhost:5173` and the server on `http://localhost:5000`.
 
 ---
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to open an issue or submit a pull request.
+
+---
+
+<p align="center">Made with ❤️ by <a href="https://github.com/Diab0licaI">Diab0lical</a></p>
