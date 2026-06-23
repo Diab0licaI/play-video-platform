@@ -126,3 +126,4 @@ Contributions are welcome! Feel free to open an issue or submit a pull request.
 ---
 
 <p align="center">Made with ❤️ by <a href="https://github.com/Diab0licaI">Diab0lical</a></p>
+
